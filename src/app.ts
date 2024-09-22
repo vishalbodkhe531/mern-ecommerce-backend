@@ -3,6 +3,7 @@ import userRoutes from "./routes/user.routes.js";
 import { connectDB } from "./utils/features.js";
 import { config } from "dotenv";
 import { errorMiddleware } from "./middlewares/error.middleware.js";
+import productRoutes from "./routes/product.routes.js";
 
 // Load environment variables from .env file
 config({
@@ -24,6 +25,9 @@ app.get("/", (req, res, next) => {
 
 // Route for user-related API endpoints
 app.use("/api/v1/user", userRoutes);
+
+// Route for product-related API endpoints
+app.use("/api/v1/product", productRoutes);
 
 // Error handling middleware (placed after all routes)
 app.use(errorMiddleware);
