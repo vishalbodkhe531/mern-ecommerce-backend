@@ -21,6 +21,8 @@ app.get("/", (req, res, next) => {
 app.use("/api/v1/user", userRoutes);
 // Route for product-related API endpoints
 app.use("/api/v1/product", productRoutes);
+// we have declare as a static.. therfore any one can access this folder data
+app.use("/uploads", express.static("uploads"));
 // Error handling middleware (placed after all routes)
 app.use(errorMiddleware);
 // Start the server and listen on the specified port
