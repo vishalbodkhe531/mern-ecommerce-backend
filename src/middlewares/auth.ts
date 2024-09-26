@@ -1,5 +1,5 @@
 import { User } from "../models/user.model.js";
-import errorHandler from "../types/utility-class.js";
+import errorHandler from "../utils/utility-class.js";
 import { TryCatch } from "./error.middleware.js";
 
 export const adminOnly = TryCatch(async (req, res, next) => {

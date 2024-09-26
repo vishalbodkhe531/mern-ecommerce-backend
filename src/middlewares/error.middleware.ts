@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import errorHandler from "../types/utility-class.js";
+import errorHandler from "../utils/utility-class.js";
 import { controllerType } from "../types/types.js";
 
 export const errorMiddleware = (

@@ -1,5 +1,5 @@
 import { User } from "../models/user.model.js";
-import errorHandler from "../types/utility-class.js";
+import errorHandler from "../utils/utility-class.js";
 import { TryCatch } from "../middlewares/error.middleware.js";
 export const newUser = TryCatch(async (req, res, next) => {
     const { name, email, photo, gender, _id, dob } = req.body;

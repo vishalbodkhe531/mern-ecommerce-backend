@@ -4,6 +4,8 @@ import { connectDB } from "./utils/features.js";
 import { config } from "dotenv";
 import { errorMiddleware } from "./middlewares/error.middleware.js";
 import productRoutes from "./routes/product.routes.js";
+import NodeCache from "node-cache";
+("node-cache");
 
 // Load environment variables from .env file
 config({
@@ -12,6 +14,8 @@ config({
 
 // Connect to the database
 connectDB();
+
+export const myCache = new NodeCache(); /// data store in RAM memory
 
 const app = express(); // Initialize the express application
 
