@@ -5,7 +5,9 @@ import { config } from "dotenv";
 import { errorMiddleware } from "./middlewares/error.middleware.js";
 import productRoutes from "./routes/product.routes.js";
 import NodeCache from "node-cache";
+import orderRoutes from "./routes/order.js";
 ("node-cache");
+import morgan from "morgan";
 // Load environment variables from .env file
 config({
     path: "./.env",
@@ -16,6 +18,7 @@ export const myCache = new NodeCache(); /// data store in RAM memory
 const app = express(); // Initialize the express application
 // Middleware to parse incoming JSON requests
 app.use(express.json());
+app.use(morgan("dev")); // It gives information about the api
 // Basic route to check server status
 app.get("/", (req, res, next) => {
     res.send("hello");
@@ -24,6 +27,8 @@ app.get("/", (req, res, next) => {
 app.use("/api/v1/user", userRoutes);
 // Route for product-related API endpoints
 app.use("/api/v1/product", productRoutes);
+// Route for orders-related API endpoints
+app.use("/api/v1/orders", orderRoutes);
 // we have declare as a static.. therfore any one can access this folder data
 app.use("/uploads", express.static("uploads"));
 // Error handling middleware (placed after all routes)
