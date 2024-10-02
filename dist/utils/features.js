@@ -7,7 +7,7 @@ export const connectDB = () => {
         .then((c) => console.log(`Database connected to ${c.connection.host}`))
         .catch((e) => console.log(`Error while connection database : ${e}`));
 };
-export const invalidateCache = async ({ product, order, admin, userId, orderId, productId, }) => {
+export const invalidateCache = async ({ product, order, admin, userId, orderId, productId, couponCode, }) => {
     if (product) {
         const productKeys = [
             "latest-products",
@@ -28,6 +28,10 @@ export const invalidateCache = async ({ product, order, admin, userId, orderId, 
             `order-${orderId}`,
         ];
         myCache.del(orderKeys);
+    }
+    if (couponCode) {
+        const couponKeys = [`all-coupons`];
+        myCache.del(couponKeys);
     }
 };
 export const reduceStock = async (orderItems) => {

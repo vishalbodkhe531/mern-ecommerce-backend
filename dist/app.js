@@ -1,13 +1,15 @@
 import express from "express";
-import userRoutes from "./routes/user.routes.js";
 import { connectDB } from "./utils/features.js";
 import { config } from "dotenv";
 import { errorMiddleware } from "./middlewares/error.middleware.js";
-import productRoutes from "./routes/product.routes.js";
 import NodeCache from "node-cache";
+// importing Routes
+import userRoutes from "./routes/user.routes.js";
+import productRoutes from "./routes/product.routes.js";
 import orderRoutes from "./routes/order.routes.js";
 ("node-cache");
 import morgan from "morgan";
+import paymentRoutes from "./routes/payment.routes.js";
 // Load environment variables from .env file
 config({
     path: "./.env",
@@ -23,12 +25,10 @@ app.use(morgan("dev")); // It gives information about the api
 app.get("/", (req, res, next) => {
     res.send("hello");
 });
-// Route for user-related API endpoints
-app.use("/api/v1/user", userRoutes);
-// Route for product-related API endpoints
-app.use("/api/v1/product", productRoutes);
-// Route for orders-related API endpoints
-app.use("/api/v1/orders", orderRoutes);
+app.use("/api/v1/user", userRoutes); // Route for user-related API endpoints
+app.use("/api/v1/product", productRoutes); // Route for product-related API endpoints
+app.use("/api/v1/orders", orderRoutes); // Route for orders-related API endpoints
+app.use("/api/v1/payment", paymentRoutes); // Route for payment-related API endpoints
 // we have declare as a static.. therfore any one can access this folder data
 app.use("/uploads", express.static("uploads"));
 // Error handling middleware (placed after all routes)
