@@ -5,7 +5,7 @@ import { config } from "dotenv";
 import { errorMiddleware } from "./middlewares/error.middleware.js";
 import productRoutes from "./routes/product.routes.js";
 import NodeCache from "node-cache";
-import orderRoutes from "./routes/order.js";
+import orderRoutes from "./routes/order.routes.js";
 ("node-cache");
 
 import morgan from "morgan";

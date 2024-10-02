@@ -4,6 +4,56 @@ import { newOrderRequestBody } from "../types/types.js";
 import { Order } from "../models/order.model.js";
 import { invalidateCache, reduceStock } from "../utils/features.js";
 import errorHandler from "../utils/utility-class.js";
+import { myCache } from "../app.js";
+
+export const myOrders = TryCatch(async (req, res, next) => {
+  const { id: user } = req.query;
+
+  const key = `my-orders-${user}`;
+
+  let orders = [];
+
+  if (myCache.has(key)) orders = JSON.parse(myCache.get(key) as string);
+  else {
+    orders = await Order.find({ user });
+    myCache.set(key, JSON.stringify(orders));
+  }
+
+  return res.status(200).json({ success: true, orders });
+});
+
+export const allOrders = TryCatch(async (req, res, next) => {
+  const key = `all-orders`;
+
+  let orders = [];
+
+  if (myCache.has(key)) orders = JSON.parse(myCache.get(key) as string);
+  else {
+    orders = await Order.find().populate("user", "name");
+    myCache.set(key, JSON.stringify(orders));
+  }
+
+  return res.status(200).json({ success: true, orders });
+});
+
+export const getSingleOrder = TryCatch(async (req, res, next) => {
+  const { id } = req.params;
+
+  const key = `order-${id}`;
+
+  let order;
+
+  if (myCache.has(key)) order = JSON.parse(myCache.get(key) as string);
+  else {
+    order = await Order.findById(id).populate("user", "name");
+
+    if (!order) return next(new errorHandler("Order not found", 404));
+
+    myCache.set(key, JSON.stringify(order));
+  }
+
+  return res.status(200).json({ success: true, order });
+});
 
 export const newOrder = TryCatch(
   async (
@@ -33,7 +83,7 @@ export const newOrder = TryCatch(
     )
       return next(new errorHandler("Please enter all the fields", 400));
 
-    await Order.create({
+    const order = await Order.create({
       shippingInfo,
       user,
       tax,
@@ -46,7 +96,13 @@ export const newOrder = TryCatch(
 
     reduceStock(orderItems);
 
-    invalidateCache({ product: true, order: true, admin: true });
+    invalidateCache({
+      product: true,
+      order: true,
+      admin: true,
+      userId: user,
+      productId: order.orderItems.map((i) => String(i.productId)),
+    });
 
     return res
       .status(201)
@@ -54,40 +110,58 @@ export const newOrder = TryCatch(
   }
 );
 
-// export const newOrder = TryCatch(
-//   async (req: Request<{}, {}, newOrderRequestBody>, res, next) => {
-//     const {
-//       shippingInfo,
-//       user,
-//       tax,
-//       subTotle,
-//       shippingCharges,
-//       discount,
-//       total,
-//       orderItems,
-//     } = req.body;
+export const processOrder = TryCatch(async (req, res, next) => {
+  const { id } = req.params;
 
-//     // if (!shippingInfo || !orderItems || !user || !subTotle || !tax || !total)
-//     //   return next(new errorHandler("Please Enter All Fields", 400));
+  const order = await Order.findById(id);
 
-//     const order = await Order.create({
-//       shippingInfo,
-//       orderItems,
-//       user,
-//       subTotle,
-//       tax,
-//       shippingCharges,
-//       discount,
-//       total,
-//     });
+  if (!order) return next(new errorHandler("Order not found !!", 404));
 
-//     await reduceStock(orderItems);
+  switch (order.status) {
+    case "Processing":
+      order.status = "Shipped";
+      break;
 
-//     await invalidateCache({ product: true, order: true, admin: true });
+    case "Shipped":
+      order.status = "Delivered";
+      break;
 
-//     return res.status(201).json({
-//       success: true,
-//       message: "Order Placed Successfully",
-//     });
-//   }
-// );
+    default:
+      order.status = "Delivered";
+      break;
+  }
+
+  await order.save();
+
+  await invalidateCache({
+    product: false,
+    order: true,
+    admin: true,
+    userId: order.user,
+    orderId: String(order.user),
+  });
+
+  return res
+    .status(200)
+    .json({ success: true, message: "Order procssed successfully" });
+});
+
+export const deleteOrder = TryCatch(async (req, res, next) => {
+  const { id } = req.params;
+
+  const order = await Order.findByIdAndDelete(id);
+
+  if (!order) return next(new errorHandler("Order not found !!", 404));
+
+  await invalidateCache({
+    product: false,
+    order: true,
+    admin: true,
+    userId: order.user,
+    orderId: String(order._id),
+  });
+
+  return res
+    .status(200)
+    .json({ success: true, message: "Order deleted successfully" });
+});
