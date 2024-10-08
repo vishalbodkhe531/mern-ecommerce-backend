@@ -3,7 +3,7 @@ import { TryCatch } from "../middlewares/error.middleware.js";
 import { Order } from "../models/order.model.js";
 import { Product } from "../models/product.model.js";
 import { User } from "../models/user.model.js";
-import { calculatePercentage } from "../utils/features.js";
+import { calculatePercentage, getInventories } from "../utils/features.js";
 
 export const getDashboardStats = TryCatch(async (req, res, next) => {
   let stats = {};
@@ -158,21 +158,12 @@ export const getDashboardStats = TryCatch(async (req, res, next) => {
       }
     });
 
-    const categoriesCountPromise = categories.map((category) =>
-      Product.countDocuments({ category })
-    );
-
-    const categoriesCount = await Promise.all(categoriesCountPromise);
-
-    const categoryCount: Record<string, number>[] = [];
-
-    categories.forEach((category, idx) => {
-      categoryCount.push({
-        [category]: Math.round((categoriesCount[idx] / productsCount) * 100),
-      });
+    const categoryCount = await getInventories({
+      categories,
+      productsCount,
     });
 
-    const UserRatio = {
+    const userRatio = {
       male: usersCount - femaleUsersCount,
       female: femaleUsersCount,
     };
@@ -193,7 +184,7 @@ export const getDashboardStats = TryCatch(async (req, res, next) => {
         order: orderMonthCount,
         revanue: orderMonthyRevenue,
       },
-      UserRatio,
+      userRatio,
       latestTransation: modiefyLatestTransation,
     };
 
@@ -203,7 +194,117 @@ export const getDashboardStats = TryCatch(async (req, res, next) => {
   return res.status(200).json({ success: true, stats });
 });
 
-export const getPieCharts = TryCatch(async (req, res, next) => {});
+export const getPieCharts = TryCatch(async (req, res, next) => {
+  let charts;
+  const key = `admin-pie-charts`;
+
+  if (myCache.has(key)) charts = JSON.parse(myCache.get(key) as string);
+  else {
+    const allOrderPromise = Order.find({}).select([
+      "total",
+      "discount",
+      "subTotle",
+      "tax",
+      "shippingCharges",
+    ]);
+
+    const [
+      ProcessingOrder,
+      ShippedOrder,
+      DeliveredOrder,
+      categories,
+      productsCount,
+      outOfStock,
+      allOrders,
+      allUsers,
+      adminUsers,
+      customerUsers,
+    ] = await Promise.all([
+      Order.countDocuments({ status: "Processing" }),
+      Order.countDocuments({ status: "Shipped" }),
+      Order.countDocuments({ status: "Delivered" }),
+      Product.distinct("category"),
+      Product.countDocuments(),
+      Product.countDocuments({ stock: 0 }),
+      allOrderPromise,
+      User.find({}).select(["dob"]),
+      User.countDocuments({ role: "admin" }),
+      User.countDocuments({ role: "user" }),
+    ]);
+
+    console.log(allUsers);
+
+    const orderFullfillment = {
+      processing: ProcessingOrder,
+      shipped: ShippedOrder,
+      delivered: DeliveredOrder,
+    };
+
+    const productCategories = await getInventories({
+      categories,
+      productsCount,
+    });
+
+    const stockAvailablity = {
+      inStock: productsCount - outOfStock,
+      outOfStock,
+    };
+
+    const grossnIncome = allOrders.reduce(
+      (prev, order) => prev + (order.total || 0),
+      0
+    );
+
+    const discount = allOrders.reduce(
+      (prev, order) => prev + (order.discount || 0),
+      0
+    );
+
+    const productionCost = allOrders.reduce(
+      (prev, order) => prev + (order.shippingCharges || 0),
+      0
+    );
+
+    const burnt = allOrders.reduce((prev, order) => prev + (order.tax || 0), 0);
+
+    const marketingCost = Math.round(grossnIncome * (30 / 100));
+
+    const netMargin =
+      grossnIncome - discount - productionCost - burnt - marketingCost;
+
+    const revenueDistribution = {
+      netMargin,
+      discount,
+      productionCost,
+      burnt,
+      marketingCost,
+    };
+
+    const userAgeGroup = {
+      teen: allUsers.filter((i) => i.age < 20).length,
+      adult: allUsers.filter((i) => i.age >= 20 && i.age <= 40).length,
+      old: allUsers.filter((i) => i.age > 40).length,
+    };
+
+    const adminCustomer = {
+      admin: adminUsers,
+      customer: customerUsers,
+    };
+
+    charts = {
+      orderFullfillment,
+      productCategories,
+      stockAvailablity,
+      revenueDistribution,
+      adminCustomer,
+      userAgeGroup,
+    };
+
+    myCache.set(key, JSON.stringify(charts));
+  }
+
+  return res.status(200).json({ success: true, charts });
+});
 
 export const getBarCharts = TryCatch(async (req, res, next) => {});
 
