@@ -3,6 +3,7 @@ import { connectDB } from "./utils/features.js";
 import { config } from "dotenv";
 import { errorMiddleware } from "./middlewares/error.middleware.js";
 import NodeCache from "node-cache";
+import Stripe from "stripe";
 
 // importing Routes
 import userRoutes from "./routes/user.routes.js";
@@ -21,6 +22,8 @@ config({
 
 // Connect to the database
 connectDB();
+
+export const stripe = new Stripe((process.env.STRIPE_KEY as string) || "");
 
 export const myCache = new NodeCache(); /// data store in RAM memory
 

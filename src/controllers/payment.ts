@@ -1,8 +1,23 @@
-import { myCache } from "../app.js";
+import { myCache, stripe } from "../app.js";
 import { TryCatch } from "../middlewares/error.middleware.js";
 import { Coupon } from "../models/coupon.model.js";
 import { invalidateCache } from "../utils/features.js";
 import errorHandler from "../utils/utility-class.js";
+
+export const newPaymentIntent = TryCatch(async (req, res, next) => {
+  const { amount } = req.body;
+
+  if (!amount) return next(new errorHandler("Please enter amount", 400));
+
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount: Number(amount) * 100,
+    currency: "inr",
+  });
+
+  return res
+    .status(200)
+    .json({ success: true, clientSecreat: paymentIntent.client_secret });
+});
 
 export const newCoupon = TryCatch(async (req, res, next) => {
   const { code, amount } = req.body;
@@ -53,10 +68,8 @@ export const deleteCoupons = TryCatch(async (req, res, next) => {
 
   await invalidateCache({ couponCode: true });
 
-  return res
-    .status(200)
-    .json({
-      success: true,
-      message: `Coupon ${coupon?.code} deleted successfully`,
-    });
+  return res.status(200).json({
+    success: true,
+    message: `Coupon ${coupon?.code} deleted successfully`,
+  });
 });
