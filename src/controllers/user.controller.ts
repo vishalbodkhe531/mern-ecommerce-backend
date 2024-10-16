@@ -13,6 +13,8 @@ export const newUser = TryCatch(
   ) => {
     const { name, email, photo, gender, _id, dob } = req.body;
 
+    console.log(name, email, photo, gender, _id, dob);
+
     let user = await User.findById(_id);
 
     if (user)

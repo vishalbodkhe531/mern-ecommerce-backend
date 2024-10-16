@@ -4,6 +4,7 @@ import { config } from "dotenv";
 import { errorMiddleware } from "./middlewares/error.middleware.js";
 import NodeCache from "node-cache";
 import Stripe from "stripe";
+import cors from "cors";
 
 // importing Routes
 import userRoutes from "./routes/user.routes.js";
@@ -33,6 +34,8 @@ const app = express(); // Initialize the express application
 app.use(express.json());
 
 app.use(morgan("dev")); // It gives information about the api
+
+app.use(cors());
 
 // Basic route to check server status
 app.get("/", (req, res, next) => {
