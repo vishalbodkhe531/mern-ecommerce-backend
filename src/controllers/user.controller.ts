@@ -3,7 +3,6 @@ import { User } from "../models/user.model.js";
 import { newUserRequestBody } from "../types/types.js";
 import errorHandler from "../utils/utility-class.js";
 import { TryCatch } from "../middlewares/error.middleware.js";
-import { Product } from "../models/product.model.js";
 
 export const newUser = TryCatch(
   async (
@@ -12,8 +11,6 @@ export const newUser = TryCatch(
     next: NextFunction
   ) => {
     const { name, email, photo, gender, _id, dob } = req.body;
-
-    console.log(name, email, photo, gender, _id, dob);
 
     let user = await User.findById(_id);
 

@@ -74,7 +74,7 @@ export const newProduct = TryCatch(
   async (req: Request<{}, {}, newProductRequestBody>, res, next) => {
     const { name, price, stock, category } = req.body;
     const photo = req.file;
-
+    //
     if (!photo) {
       return res
         .status(400)
@@ -108,8 +108,11 @@ export const updateProducts = TryCatch(async (req, res, next) => {
   const { id } = req.params;
 
   const { name, price, stock, category } = req.body;
+
   const photo = req.file;
   const product = await Product.findById(id);
+
+  console.log("photo", photo);
 
   if (!product) return next(new errorHandler("Invalid product ID", 404));
 
@@ -145,7 +148,7 @@ export const deleteProduct = TryCatch(async (req, res, next) => {
     console.log("Product photo deleted");
   });
 
-  await Product.deleteOne();
+  await product.deleteOne();
 
   invalidateCache({ product: true, productId: String(product._id) });
 
@@ -157,6 +160,8 @@ export const deleteProduct = TryCatch(async (req, res, next) => {
 export const getAllSearchProduct = TryCatch(
   async (req: Request<{}, {}, {}, searchRequestQuery>, res, next) => {
     const { search, sort, category, price } = req.query;
+
+    console.log(sort);
 
     const page = Number(req.query.page) || 1;
 

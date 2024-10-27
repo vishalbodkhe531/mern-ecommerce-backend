@@ -3,6 +3,7 @@ import errorHandler from "../utils/utility-class.js";
 import { TryCatch } from "./error.middleware.js";
 export const adminOnly = TryCatch(async (req, res, next) => {
     const { id } = req.query;
+    console.log("id : ", id);
     if (!id)
         return next(new errorHandler("You should login first !!", 401));
     const user = await User.findById(id);
