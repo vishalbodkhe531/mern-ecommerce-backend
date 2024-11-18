@@ -16,7 +16,7 @@ export const newPaymentIntent = TryCatch(async (req, res, next) => {
 
   return res
     .status(200)
-    .json({ success: true, clientSecreat: paymentIntent.client_secret });
+    .json({ success: true, clientSecret: paymentIntent.client_secret });
 });
 
 export const newCoupon = TryCatch(async (req, res, next) => {

@@ -45,7 +45,7 @@ export const getSingleOrder = TryCatch(async (req, res, next) => {
 
   if (myCache.has(key)) order = JSON.parse(myCache.get(key) as string);
   else {
-    order = await Order.findById(id).populate("user", "name");
+    order = await Order.findById(id).populate("user");
 
     if (!order) return next(new errorHandler("Order not found", 404));
 
