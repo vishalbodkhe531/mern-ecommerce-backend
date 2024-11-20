@@ -14,16 +14,16 @@ import { invalidateCache } from "../utils/features.js";
 
 // Revalidate on New,Update product & on New Order
 export const getLatestProducts = TryCatch(async (req, res, next) => {
-  let product = [];
+  let products = [];
 
   if (myCache.has("latest-products")) {
-    product = JSON.parse(myCache.get("latest-products") as string);
+    products = JSON.parse(myCache.get("latest-products") as string);
   } else {
-    product = await Product.find({}).sort({ createdAt: -1 }).limit(5); // 1 = asc... -1 = des...
-    myCache.set("latest-products", JSON.stringify(product));
+    products = await Product.find({}).sort({ createdAt: -1 }).limit(5); // 1 = asc... -1 = des...
+    myCache.set("latest-products", JSON.stringify(products));
   }
 
-  return res.status(200).json({ success: true, product });
+  return res.status(200).json({ success: true, products });
 });
 
 // Revalidate on New,Update product & on New Order
