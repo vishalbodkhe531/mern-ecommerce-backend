@@ -65,7 +65,7 @@ export const newOrder = TryCatch(
       shippingInfo,
       user,
       tax,
-      subTotle,
+      subtotal,
       shippingCharges,
       discount,
       total,
@@ -76,7 +76,7 @@ export const newOrder = TryCatch(
       !shippingInfo ||
       !user ||
       !tax ||
-      !subTotle ||
+      !subtotal ||
       !shippingCharges ||
       !total ||
       !orderItems
@@ -87,7 +87,7 @@ export const newOrder = TryCatch(
       shippingInfo,
       user,
       tax,
-      subTotle,
+      subtotal,
       shippingCharges,
       discount,
       total,

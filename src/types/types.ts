@@ -71,7 +71,7 @@ export interface newOrderRequestBody {
   shippingInfo: shiffingInfoType;
   user: string;
   tax: number;
-  subTotle: number;
+  subtotal: number;
   shippingCharges: number;
   discount: number;
   total: number;
