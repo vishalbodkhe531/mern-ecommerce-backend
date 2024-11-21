@@ -41,25 +41,21 @@ export const getSingleOrder = TryCatch(async (req, res, next) => {
     return res.status(200).json({ success: true, order });
 });
 export const newOrder = TryCatch(async (req, res, next) => {
-    const { shippingInfo, user, tax, subTotle, shippingCharges, discount, total, orderItems, } = req.body;
-    if (!shippingInfo ||
-        !user ||
-        !tax ||
-        !subTotle ||
-        !shippingCharges ||
-        !total ||
-        !orderItems)
-        return next(new errorHandler("Please enter all the fields", 400));
+    const { shippingInfo, user, tax, subtotal, shippingCharges, discount, total, orderItems, } = req.body;
+    console.log(shippingInfo, user, tax, subtotal, shippingCharges, discount, total, orderItems);
+    if (!shippingInfo || !orderItems || !user || !subtotal || !tax || !total)
+        return next(new errorHandler("Please Enter All Fields", 400));
     const order = await Order.create({
         shippingInfo,
         user,
         tax,
-        subTotle,
+        subtotal,
         shippingCharges,
         discount,
         total,
         orderItems,
     });
+    console.log("order : ", order);
     reduceStock(orderItems);
     invalidateCache({
         product: true,

@@ -57,6 +57,7 @@ export type orderItemTypes = {
   photo: string;
   quantity: number;
   productId: string;
+  stock?: number;
 };
 
 export type shiffingInfoType = {

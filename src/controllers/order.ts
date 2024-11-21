@@ -72,16 +72,19 @@ export const newOrder = TryCatch(
       orderItems,
     } = req.body;
 
-    if (
-      !shippingInfo ||
-      !user ||
-      !tax ||
-      !subtotal ||
-      !shippingCharges ||
-      !total ||
-      !orderItems
-    )
-      return next(new errorHandler("Please enter all the fields", 400));
+    console.log(
+      shippingInfo,
+      user,
+      tax,
+      subtotal,
+      shippingCharges,
+      discount,
+      total,
+      orderItems
+    );
+
+    if (!shippingInfo || !orderItems || !user || !subtotal || !tax || !total)
+      return next(new errorHandler("Please Enter All Fields", 400));
 
     const order = await Order.create({
       shippingInfo,
@@ -93,6 +96,8 @@ export const newOrder = TryCatch(
       total,
       orderItems,
     });
+
+    console.log("order : ", order);
 
     reduceStock(orderItems);
 
